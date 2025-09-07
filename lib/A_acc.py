@@ -226,9 +226,8 @@ def get_color_corrected_increased_dynamic_range(image_path, device=None):
     im_increased_b = increase_dynamic_range(b)
 
     merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
-    cv2.imwrite("temp/temporary.png", merged)
 
-    return merged
+    return merged, cast
 
 
 
