@@ -37,8 +37,8 @@ def init_pernah(type='raw-890'):
 
     return df
 
-def init_satuan_acc(file_name):
-    im_satuan = []
+def init_satuan_acc(im_array):
+    # im_array = []
     # im_satuan.append("250815_underwater/dataset-250815-acc/"+file_name)
 
     # im_filename = []
@@ -50,3 +50,4 @@ def init_satuan_acc(file_name):
     # df = pd.DataFrame(dict_combo)
 
     # return df
+    return 0

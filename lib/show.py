@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.image import imread
 import cv2
 import numpy as np
+import math
 
 def show_image_matplotlib(img: np.ndarray, title: str = None, title_2: str = None):
     """

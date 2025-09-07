@@ -2,10 +2,9 @@ import torch
 import numpy as np
 import cv2
 
-from lib.ccf import get_ccf_wrapper
 
 def compensate_color(img_bgr: np.ndarray, color: str = "red",
-                        device: str = "cuda"):
+                        device=None):
     """
     Kompensasi channel merah sesuai dua tahap:
       1. Rumus Ir'(x,y) = Ir(x,y) + (1 - IrM/IgM)*(1 - Ir(x,y))*Ig(x,y)
@@ -68,7 +67,7 @@ def compensate_color(img_bgr: np.ndarray, color: str = "red",
     # return out_bgr
 
 def compensate_color_bluish(img_bgr: np.ndarray, color: str = "red",
-                        device: str = "cuda"):
+                        device=None):
    
     if img_bgr is None or not isinstance(img_bgr, np.ndarray):
         raise ValueError("Input harus berupa numpy array gambar (BGR).")
@@ -185,7 +184,7 @@ def increase_dynamic_range(channel: np.ndarray):
     return Ic_final
 
 
-def get_color_corrected(image_path, device="cuda"):
+def get_color_corrected(image_path, device=None):
     """
     Wrapper: versi path file, otomatis baca gambar lalu hitung metrik Lab di GPU.
     """
@@ -210,15 +209,16 @@ def get_color_corrected(image_path, device="cuda"):
         Ig = compensate_color_bluish(img_bgr, color="green")
         Ir = compensate_color_bluish(img_bgr, color="red")
         out = torch.stack([Ir, Ig, b], dim=0)  # [3,H,W]
-        
+    else:
+        out = torch.stack([r, g, b], dim=0)  # [3,H,W]
     out = (out * 255.0).round().clamp(0, 255).to(torch.uint8)
     out = out.permute(1, 2, 0).contiguous()  # [H,W,3] BGR
     out_bgr = out.detach().cpu().numpy()
 
     return out_bgr, cast
 
-def get_color_corrected_increased_dynamic_range(image_path, device="cuda"):
-    im_corrected, cast = get_color_corrected(image_path)
+def get_color_corrected_increased_dynamic_range(image_path, device=None):
+    im_corrected, cast = get_color_corrected(image_path, device=device)
     b, g, r = cv2.split(im_corrected)
 
     im_increased_r = increase_dynamic_range(r)
@@ -226,8 +226,78 @@ def get_color_corrected_increased_dynamic_range(image_path, device="cuda"):
     im_increased_b = increase_dynamic_range(b)
 
     merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
+    cv2.imwrite("temporary.png", merged)
 
     return merged
+
+
+
+def get_ccf(img_array, cie=False, device=None):
+    """
+    Hitung m_a, m_b, M, D_a, D_b, D, dan cast menggunakan PyTorch GPU.
+    """
+    if img_array is None:
+        raise ValueError("Input harus berupa numpy array gambar.")
+
+    # Konversi BGR -> Lab (CPU OpenCV)
+    lab = cv2.cvtColor(img_array, cv2.COLOR_BGR2Lab)
+    L, a, b = cv2.split(lab)
+
+    # Convert ke tensor di GPU
+    a = torch.tensor(a, dtype=torch.float32, device=device)
+    b = torch.tensor(b, dtype=torch.float32, device=device)
+
+    if cie:
+        a -= 128.0
+        b -= 128.0
+
+    N = a.numel()
+
+    # Mean
+    m_a = torch.sum(a) / N
+    m_b = torch.sum(b) / N
+
+    # Magnitude M
+    M = torch.sqrt(m_a**2 + m_b**2)
+
+    # Deviation
+    D_a = torch.sum(torch.abs(a - m_a)) / N
+    D_b = torch.sum(torch.abs(b - m_b)) / N
+    D = torch.sqrt(D_a**2 + D_b**2)
+
+    CCF = float(M.item() / D.item()) if D.item() != 0 else float("inf")
+
+    if(CCF < 1):
+        cast = "no-color-cast"
+    else:
+        # Cast classification
+        ratio = torch.abs(m_a / m_b) if m_b != 0 else torch.tensor(float("inf"), device=device)
+        if (m_a < 0) and (ratio >= 1):
+            cast = "greenish"
+        elif (m_b < 0) and (ratio < 1):
+            cast = "bluish"
+        else:
+            cast = "yellowish"
+
+    return {
+        # "m_a": float(m_a.item()),
+        # "m_b": float(m_b.item()),
+        # "M": float(M.item()),
+        # "D_a": float(D_a.item()),
+        # "D_b": float(D_b.item()),
+        # "D": float(D.item()),
+        "CCF": float(M.item() / D.item()) if D.item() != 0 else float("inf"),
+        "cast": cast
+    }
+
+def get_ccf_wrapper(image_path, cie=True, device=None):
+    """
+    Wrapper: versi path file, otomatis baca gambar lalu hitung metrik Lab di GPU.
+    """
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError("Gambar tidak ditemukan atau path salah.")
+    return get_ccf(img, cie=cie, device=device)
 
 
 
