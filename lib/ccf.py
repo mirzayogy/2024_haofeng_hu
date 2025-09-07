@@ -1,48 +1,41 @@
-import cv2 # ignore
-import numpy as np
+import cv2
+import torch
 
-def mean_ab_M_array(img_array, cie=False):
+def get_ccf(img_array, cie=False, device="cuda"):
     """
-    Menghitung mean chromaticity m_a, m_b, dan M dari gambar (numpy array).
-    
-    Parameters:
-        img_array (numpy.ndarray): gambar dalam format BGR (seperti hasil cv2.imread)
-        cie (bool): jika True, konversi channel a,b ke rentang [-128, 127]
-    
-    Returns:
-        (m_a, m_b, M): tuple nilai rata-rata channel a, b, dan M
+    Hitung m_a, m_b, M, D_a, D_b, D, dan cast menggunakan PyTorch GPU.
     """
-    if img_array is None or not isinstance(img_array, np.ndarray):
+    if img_array is None:
         raise ValueError("Input harus berupa numpy array gambar.")
 
-    # Konversi BGR ke Lab
+    # Konversi BGR -> Lab (CPU OpenCV)
     lab = cv2.cvtColor(img_array, cv2.COLOR_BGR2Lab)
-
-    # Pisahkan channel
     L, a, b = cv2.split(lab)
 
-    # Jika ingin pakai skala asli CIE Lab [-128, 127]
+    # Convert ke tensor di GPU
+    a = torch.tensor(a, dtype=torch.float32, device=device)
+    b = torch.tensor(b, dtype=torch.float32, device=device)
+
     if cie:
-        a = a.astype(np.float32) - 128
-        b = b.astype(np.float32) - 128
+        a -= 128.0
+        b -= 128.0
 
-    # Ukuran gambar
-    p, q = a.shape
+    N = a.numel()
 
-    # Hitung mean
-    m_a = np.sum(a) / (p * q)
-    m_b = np.sum(b) / (p * q)
+    # Mean
+    m_a = torch.sum(a) / N
+    m_b = torch.sum(b) / N
 
-    # Hitung M
-    M = np.sqrt(m_a**2 + m_b**2)
+    # Magnitude M
+    M = torch.sqrt(m_a**2 + m_b**2)
 
-    # return m_a, m_b, M
+    # Deviation
+    D_a = torch.sum(torch.abs(a - m_a)) / N
+    D_b = torch.sum(torch.abs(b - m_b)) / N
+    D = torch.sqrt(D_a**2 + D_b**2)
 
-
-    if m_b == 0:
-        ratio = np.inf
-    else:
-        ratio = abs(m_a / m_b)
+    # Cast classification
+    ratio = torch.abs(m_a / m_b) if m_b != 0 else torch.tensor(float("inf"), device=device)
     if (m_a < 0) and (ratio >= 1):
         cast = "greenish"
     elif (m_b < 0) and (ratio < 1):
@@ -50,109 +43,28 @@ def mean_ab_M_array(img_array, cie=False):
     else:
         cast = "yellowish"
 
-    return M, cast
+    return {
+        # "m_a": float(m_a.item()),
+        # "m_b": float(m_b.item()),
+        # "M": float(M.item()),
+        # "D_a": float(D_a.item()),
+        # "D_b": float(D_b.item()),
+        # "D": float(D.item()),
+        "CCF": float(M.item() / D.item()) if D.item() != 0 else float("inf"),
+        "cast": cast
+    }
 
-
-def mean_ab_M(image_path, cie=False):
+def get_ccf_wrapper(image_path, cie=True, device="cuda"):
     """
-    Wrapper: versi path file, otomatis baca gambar lalu hitung m_a, m_b, dan M.
-    """
-    img = cv2.imread(image_path)
-    if img is None:
-        raise ValueError("Gambar tidak ditemukan atau path salah.")
-    return mean_ab_M_array(img, cie=cie)
-
-
-# # Contoh penggunaan
-# if __name__ == "__main__":
-#     img_path = "contoh.jpg"
-
-#     # Default (rentang OpenCV 0–255)
-#     m_a, m_b, M = mean_ab_M(img_path, cie=False)
-#     print("[OpenCV scale] m_a:", m_a, " m_b:", m_b, " M:", M)
-
-#     # Versi rentang CIE Lab asli [-128,127]
-#     m_a, m_b, M = mean_ab_M(img_path, cie=True)
-#     print("[CIE Lab scale] m_a:", m_a, " m_b:", m_b, " M:", M)
-
-
-def deviation_ab_D_array(img_array, cie=False):
-    """
-    Menghitung D_a, D_b, dan D dari gambar (numpy array).
-    
-    Parameters:
-        img_array (numpy.ndarray): gambar dalam format BGR (seperti hasil cv2.imread)
-        cie (bool): jika True, konversi channel a,b ke rentang [-128, 127]
-    
-    Returns:
-        (D_a, D_b, D): tuple nilai deviasi rata-rata channel a, b, dan gabungannya D
-    """
-    if img_array is None or not isinstance(img_array, np.ndarray):
-        raise ValueError("Input harus berupa numpy array gambar.")
-
-    # Konversi BGR ke Lab
-    lab = cv2.cvtColor(img_array, cv2.COLOR_BGR2Lab)
-
-    # Pisahkan channel
-    L, a, b = cv2.split(lab)
-
-    # Jika ingin pakai skala asli CIE Lab [-128, 127]
-    if cie:
-        a = a.astype(np.float32) - 128
-        b = b.astype(np.float32) - 128
-
-    # Ukuran gambar
-    p, q = a.shape
-    N = p * q
-
-    # Mean dari channel a dan b
-    m_a = np.sum(a) / N
-    m_b = np.sum(b) / N
-
-    # Hitung deviasi rata-rata
-    D_a = np.sum(np.abs(a - m_a)) / N
-    D_b = np.sum(np.abs(b - m_b)) / N
-
-    # Gabungan
-    D = np.sqrt(D_a**2 + D_b**2)
-
-    # return D_a, D_b, D
-    return D
-
-
-def deviation_ab_D(image_path, cie=False):
-    """
-    Wrapper: versi path file.
+    Wrapper: versi path file, otomatis baca gambar lalu hitung metrik Lab di GPU.
     """
     img = cv2.imread(image_path)
     if img is None:
         raise ValueError("Gambar tidak ditemukan atau path salah.")
-    return deviation_ab_D_array(img, cie=cie)
+    return get_ccf(img, cie=cie, device=device)
 
-
-# # Contoh penggunaan
+# -------- contoh pemanggilan ----------
 # if __name__ == "__main__":
-#     img_path = "contoh.jpg"
-
-#     D_a, D_b, D = deviation_ab_D(img_path, cie=True)
-#     print("D_a:", D_a, " D_b:", D_b, " D:", D)
-
-def getCCF(image_path):
-    M, cast = mean_ab_M(image_path,cie = True)
-    D = deviation_ab_D(image_path, cie = True)
-
-    return M/D, cast
-
-def _classify_cast(m_a: float, m_b: float) -> str:
-    # |ma/mb| dengan penanganan mb=0
-    if m_b == 0:
-        ratio = np.inf
-    else:
-        ratio = abs(m_a / m_b)
-
-    if (m_a < 0) and (ratio >= 1):
-        return "greenish"
-    elif (m_b < 0) and (ratio < 1):
-        return "bluish"
-    else:
-        return "yellowish"
+#     img = cv2.imread("../UIEB/pernah/18_img_.png")
+#     metrics = get_ccf(img, cie=True, device=None)
+#     print(metrics['cast'])
