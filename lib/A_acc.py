@@ -1,6 +1,6 @@
-import torch
-import numpy as np
-import cv2
+import torch  # type: ignore
+import numpy as np # type: ignore
+import cv2 # type: ignore
 
 
 def compensate_color(img_bgr: np.ndarray, color: str = "red",
@@ -101,14 +101,14 @@ def compensate_color_bluish(img_bgr: np.ndarray, color: str = "red",
     return Itopi
 
 
-def compensate_color_wrapper(image_path, color):
+def compensate_color_wrapper(image_path, color, device):
     """
     Wrapper: versi path file, otomatis baca gambar lalu hitung metrik Lab di GPU.
     """
     img_bgr = cv2.imread(image_path)
     if img_bgr is None:
         raise ValueError("Gambar tidak ditemukan atau path salah.")
-    return compensate_color(img_bgr=img_bgr, color=color, cie=True, device="cuda")
+    return compensate_color(img_bgr=img_bgr, color=color, cie=True, device=device)
 
 
 def merge_rgb(r_channel, g_channel, b_channel):
@@ -132,7 +132,7 @@ def merge_rgb(r_channel, g_channel, b_channel):
 
     # stack channel
     img_rgb = cv2.merge([r_channel, g_channel, b_channel])  # hasil RGB
-    img_rgb = cv2.merge([b_channel, g_channel, r_channel])  # hasil RGB
+    # img_rgb = cv2.merge([b_channel, g_channel, r_channel])  # hasil RGB
 
     return img_rgb
 
@@ -188,7 +188,7 @@ def get_color_corrected(image_path, device=None):
     """
     Wrapper: versi path file, otomatis baca gambar lalu hitung metrik Lab di GPU.
     """
-    metrics = get_ccf_wrapper(image_path) # metrics['CCF']/metrics['cast']
+    metrics = get_ccf_wrapper(image_path, device) # metrics['CCF']/metrics['cast']
 
     img_bgr = cv2.imread(image_path)
     t = torch.from_numpy(img_bgr).to(device=device, dtype=torch.float32) / 255.0
@@ -198,16 +198,16 @@ def get_color_corrected(image_path, device=None):
    
     cast = metrics['cast']
     if(cast == 'greenish'):
-        Ir = compensate_color(img_bgr, color="red")
-        Ib = compensate_color(img_bgr, color="blue")
+        Ir = compensate_color(img_bgr, color="red", device=device)
+        Ib = compensate_color(img_bgr, color="blue", device=device)
         out = torch.stack([Ir, g, Ib], dim=0)  # [3,H,W]
     elif(cast == "yellowish"):
-        Ig = compensate_color(img_bgr, color="green")
-        Ib = compensate_color(img_bgr, color="blue")
+        Ig = compensate_color(img_bgr, color="green", device=device)
+        Ib = compensate_color(img_bgr, color="blue", device=device)
         out = torch.stack([r, Ig, Ib], dim=0)  # [3,H,W]
     elif(cast == "bluish"):
-        Ig = compensate_color_bluish(img_bgr, color="green")
-        Ir = compensate_color_bluish(img_bgr, color="red")
+        Ig = compensate_color_bluish(img_bgr, color="green", device=device)
+        Ir = compensate_color_bluish(img_bgr, color="red", device=device)
         out = torch.stack([Ir, Ig, b], dim=0)  # [3,H,W]
     else:
         out = torch.stack([r, g, b], dim=0)  # [3,H,W]
@@ -226,7 +226,7 @@ def get_color_corrected_increased_dynamic_range(image_path, device=None):
     im_increased_b = increase_dynamic_range(b)
 
     merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
-    cv2.imwrite("temporary.png", merged)
+    cv2.imwrite("temp/temporary.png", merged)
 
     return merged
 
