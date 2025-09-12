@@ -33,7 +33,7 @@ id,filename,cast
 31,12299.png,no-color-cast
 32,122_img_.png,no-color-cast
 33,12324.png,no-color-cast
-34,12336.png,greenish
+34,12336.png,no-color-cast
 35,12348.png,no-color-cast
 36,123_img_.png,no-color-cast
 37,12422.png,no-color-cast
@@ -95,7 +95,7 @@ id,filename,cast
 93,165_img_.png,no-color-cast
 94,1660.png,no-color-cast
 95,166_img_.png,no-color-cast
-96,168_img_.png,no-color-cast
+96,168_img_.png,bluish
 97,169_img_.png,no-color-cast
 98,16_img_.png,no-color-cast
 99,170_img_.png,no-color-cast
@@ -106,7 +106,7 @@ id,filename,cast
 104,174_img_.png,bluish
 105,175_img_.png,no-color-cast
 106,176_img_.png,no-color-cast
-107,177_img_.png,bluish
+107,177_img_.png,no-color-cast
 108,178_img_.png,no-color-cast
 109,179_img_.png,no-color-cast
 110,17_img_.png,no-color-cast
@@ -130,7 +130,7 @@ id,filename,cast
 128,196_img_.png,no-color-cast
 129,197_img_.png,no-color-cast
 130,198_img_.png,no-color-cast
-131,199_img_.png,greenish
+131,199_img_.png,no-color-cast
 132,19_img_.png,no-color-cast
 133,20.png,no-color-cast
 134,200_img_.png,no-color-cast
@@ -138,7 +138,7 @@ id,filename,cast
 136,202_img_.png,yellowish
 137,203_img_.png,no-color-cast
 138,204_img_.png,bluish
-139,205_img_.png,bluish
+139,205_img_.png,no-color-cast
 140,206_img_.png,no-color-cast
 141,207_img_.png,no-color-cast
 142,208_img_.png,yellowish
@@ -171,7 +171,7 @@ id,filename,cast
 169,236_img_.png,no-color-cast
 170,238_img_.png,no-color-cast
 171,23_img_.png,no-color-cast
-172,240_img_.png,bluish
+172,240_img_.png,no-color-cast
 173,241_img_.png,no-color-cast
 174,242_img_.png,no-color-cast
 175,243_img_.png,no-color-cast
@@ -205,18 +205,18 @@ id,filename,cast
 203,2701.png,no-color-cast
 204,270_img_.png,no-color-cast
 205,271_img_.png,no-color-cast
-206,272_img_.png,greenish
+206,272_img_.png,no-color-cast
 207,273_img_.png,no-color-cast
 208,274_img_.png,greenish
 209,275_img_.png,no-color-cast
-210,276_img_.png,greenish
+210,276_img_.png,no-color-cast
 211,2774.png,yellowish
 212,277_img_.png,no-color-cast
 213,2787.png,no-color-cast
 214,278_img_.png,no-color-cast
 215,279_img_.png,no-color-cast
 216,27_img_.png,no-color-cast
-217,280_img_.png,bluish
+217,280_img_.png,no-color-cast
 218,281_img_.png,no-color-cast
 219,282_img_.png,no-color-cast
 220,284_img_.png,no-color-cast
@@ -228,12 +228,12 @@ id,filename,cast
 226,290_img_.png,no-color-cast
 227,292_img_.png,no-color-cast
 228,293_img_.png,no-color-cast
-229,294_img_.png,bluish
+229,294_img_.png,no-color-cast
 230,295_img_.png,no-color-cast
 231,296_img_.png,greenish
 232,2977.png,no-color-cast
 233,298_img_.png,no-color-cast
-234,299_img_.png,no-color-cast
+234,299_img_.png,bluish
 235,29_img_.png,no-color-cast
 236,2_img_.png,no-color-cast
 237,3001.png,no-color-cast
@@ -458,8 +458,8 @@ id,filename,cast
 456,528_img_.png,no-color-cast
 457,52_img_.png,no-color-cast
 458,530_img_.png,no-color-cast
-459,531_img_.png,bluish
-460,532_img_.png,no-color-cast
+459,531_img_.png,no-color-cast
+460,532_img_.png,yellowish
 461,533_img_.png,no-color-cast
 462,534_img_.png,no-color-cast
 463,535_img_.png,greenish
@@ -471,7 +471,7 @@ id,filename,cast
 469,53_img_.png,greenish
 470,540_img_.png,no-color-cast
 471,541_img_.png,no-color-cast
-472,542_img_.png,no-color-cast
+472,542_img_.png,yellowish
 473,543_img_.png,no-color-cast
 474,544_img_.png,no-color-cast
 475,545_img_.png,bluish
@@ -504,7 +504,7 @@ id,filename,cast
 502,56_img_.png,bluish
 503,570_img_.png,no-color-cast
 504,571_img_.png,no-color-cast
-505,572_img_.png,bluish
+505,572_img_.png,no-color-cast
 506,573_img_.png,bluish
 507,574_img_.png,greenish
 508,575_img_.png,greenish
@@ -551,7 +551,7 @@ id,filename,cast
 549,608_img_.png,no-color-cast
 550,609_img_.png,no-color-cast
 551,60_img_.png,no-color-cast
-552,610_img_.png,bluish
+552,610_img_.png,no-color-cast
 553,611_img_.png,no-color-cast
 554,612_img_.png,no-color-cast
 555,613_img_.png,no-color-cast
@@ -572,8 +572,8 @@ id,filename,cast
 570,628_img_.png,no-color-cast
 571,629_img_.png,no-color-cast
 572,62_img_.png,no-color-cast
-573,630_img_.png,yellowish
-574,631_img_.png,yellowish
+573,630_img_.png,no-color-cast
+574,631_img_.png,no-color-cast
 575,632_img_.png,no-color-cast
 576,633_img_.png,no-color-cast
 577,634_img_.png,no-color-cast
@@ -747,7 +747,7 @@ id,filename,cast
 745,794_img_.png,no-color-cast
 746,795_img_.png,no-color-cast
 747,796_img_.png,no-color-cast
-748,797_img_.png,no-color-cast
+748,797_img_.png,bluish
 749,798_img_.png,no-color-cast
 750,799_img_.png,no-color-cast
 751,79_img_.png,no-color-cast
@@ -865,7 +865,7 @@ id,filename,cast
 863,91_img_.png,no-color-cast
 864,920_img_.png,no-color-cast
 865,921_img_.png,no-color-cast
-866,922_img_.png,bluish
+866,922_img_.png,no-color-cast
 867,923_img_.png,no-color-cast
 868,924_img_.png,no-color-cast
 869,925_img_.png,no-color-cast
@@ -885,7 +885,7 @@ id,filename,cast
 883,9896.png,no-color-cast
 884,98_img_.png,no-color-cast
 885,9900.png,no-color-cast
-886,9907.png,yellowish
+886,9907.png,no-color-cast
 887,9947.png,no-color-cast
 888,99_img_.png,bluish
 889,9_img_.png,no-color-cast

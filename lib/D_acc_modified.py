@@ -201,15 +201,22 @@ def get_color_corrected(image_path, device=None):
         Ir = compensate_color(img_bgr, color="red", device=device)
         Ib = compensate_color(img_bgr, color="blue", device=device)
         out = torch.stack([Ir, g, Ib], dim=0)  # [3,H,W]
+        print('greenish')
+        # out = torch.stack([Ib, g, Ir], dim=0)  # [3,H,W]
     elif(cast == "yellowish"):
         Ig = compensate_color(img_bgr, color="green", device=device)
         Ib = compensate_color(img_bgr, color="blue", device=device)
         out = torch.stack([r, Ig, Ib], dim=0)  # [3,H,W]
+        print('yellowish')
+        # out = torch.stack([Ib, Ig, r], dim=0)  # [3,H,W]
     elif(cast == "bluish"):
         Ig = compensate_color_bluish(img_bgr, color="green", device=device)
         Ir = compensate_color_bluish(img_bgr, color="red", device=device)
         out = torch.stack([Ir, Ig, b], dim=0)  # [3,H,W]
+        print('bluish')
+        # out = torch.stack([b, Ig, Ir], dim=0)  # [3,H,W]
     else:
+        print('no-color-cast')
         out = torch.stack([r, g, b], dim=0)  # [3,H,W]
     out = (out * 255.0).round().clamp(0, 255).to(torch.uint8)
     out = out.permute(1, 2, 0).contiguous()  # [H,W,3] BGR
@@ -225,11 +232,23 @@ def get_color_corrected_increased_dynamic_range(image_path, device=None):
     im_increased_g = increase_dynamic_range(g)
     im_increased_b = increase_dynamic_range(b)
 
-    merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
-
+    if(cast != "no-color-cast"):
+        merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
+    else:
+        merged = merge_rgb(r, g, b)
     return merged, cast
 
+def get_increased_dynamic_range(image_path, device=None):
+    im_corrected = cv2.imread(image_path)
+    b, g, r = cv2.split(im_corrected)
 
+    im_increased_r = increase_dynamic_range(r)
+    im_increased_g = increase_dynamic_range(g)
+    im_increased_b = increase_dynamic_range(b)
+
+    merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
+
+    return merged
 
 def get_ccf(img_array, cie=True, device=None):
     """

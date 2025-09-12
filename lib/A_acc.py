@@ -225,8 +225,10 @@ def get_color_corrected_increased_dynamic_range(image_path, device=None):
     im_increased_g = increase_dynamic_range(g)
     im_increased_b = increase_dynamic_range(b)
 
-    merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
-
+    if(cast != "no-color-cast"):
+        merged = merge_rgb(im_increased_r, im_increased_g, im_increased_b)
+    else:
+        merged = merge_rgb(r, g, b)
     return merged, cast
 
 
